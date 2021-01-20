@@ -96,7 +96,7 @@
             day=c(day,daydum)
         }
     }
-    conv.time=list(year=year,month=month,day=day)
+    conv.time=data.frame(year=year, month=month, day=day)
 
     dat=extractnc(nc,varnc,NULL,ndims,varsize)
     nc_close(nc)

@@ -5,13 +5,7 @@
 
 library(ncdf4)
 
-SI=Sys.info()
-if(SI[[1]] == "Darwin"){
-  Rsource="/Users/yiou/programs/RStat/WREGIMES/"
-}
-if(SI[[1]] == "Linux"){
-  Rsource="/home/users/yiou/RStat/WREGIMES/"
-}
+Rsource="./"
 
 ## Parametres de l'analyse
 args=(commandArgs(TRUE))
@@ -23,33 +17,37 @@ if(length(args)>0){
     freg=args[i];i=i+1 ## Fichier des regimes de reference
     fout=args[i];i=i+1 ## Fichier de sortie
 }else{
-    fname="nom_de_simu.nc"
+    fname="inst/extdata/SLP_IPSLCM5MR_19500101_19991231_daily.nc"
     varname="slp"
-    freg="nom_de_regimes.Rdata"
-    fout="nom_de_resultat.Rdata"
+    freg="myfileWR.Rdata"
+    fout="myfileCl.txt"
 }
 
 ## Initialisation des fonctions
 source(paste(Rsource,"read_ncfiles.R",sep="")) ## Lecture des fichiers ncdf
 source(paste(Rsource,"preproc_WR.R",sep="")) ## Calcul des cycles saisonniers
 
+## Definitions des saisons
+env_seas = new.env()
+source("def_seasons.R", local = env_seas)
+l.seas = env_seas$l.seas
+
 ## Lecture des regimes sur la simulation de controle
-load(freg)
+# save(file=fout,dat.class,pc.dat,nreg,fname,seas,dat.MOD.time,ISEAS,
+env_inputs = new.env()
+load(freg, envir = env_inputs)
+dat.class = env_inputs$dat.class
+seas = env_inputs$seas
+nreg = env_inputs$nreg
 
 ## Lecture des données de pression/Z500 sur les autres simulations
-yr1=1996
-yr2=2005
-dat.IPSL = readipslnc(fname=fname, varname=varname,ical=360,
-                      yr.range=c(yr1,yr2))
+dat.IPSL = readipslnc(fname=fname, varname=varname,ical=365,
+                      yr.range=c(1950,1999))
 
 ## "readipslnc" <- function(varname="t2m",fname,yr.range,ical=360)
 
-## Calcul d'une ponderation par la racine du cos de la latitude
-pond.z500=1/sqrt(cos(dat.IPSL$lat*pi/180))
-scale.z500=rep(pond.z500,length(dat.IPSL$lon))
-
 ## Soustraction du cycle saisonnier & calcul d'anomalies saisonnieres
-dat.IPSL.dum=sousseasmean(dat.IPSL$dat,dat.IPSL$conv.time)
+dat.IPSL.dum=sousseasmean(dat.IPSL$dat,dat.IPSL$time)
 
 dat.IPSL.time = dat.IPSL$time
 
@@ -71,8 +69,7 @@ class.Xdiff=apply(Xdiff,1,which.min)
 dist.reg=sqrt(apply(Xdiff,1,min)/nrow(dat.class$reg.var))
 
 
-Xout = cbind(dat.IPSL.time[I.seas], class.Xdiff, dist.reg)
-write.table(file=fout,Xout,row.names=FALSE, quote=FALSE,col.names=FALSE)
+Xout = cbind(dat.IPSL.time[I.seas,], "class"  = class.Xdiff, "dist" = dist.reg)
+write.table(file=fout,Xout,row.names=FALSE, quote=FALSE,col.names=TRUE)
 
-q("no")
 

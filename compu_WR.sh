@@ -5,24 +5,28 @@
 ## Se lance par
 ## ./compu_WR.sh
 
+set -o errexit
+set -o nounset
+set -o pipefail
+
 start_date=`date +"%m/%d/%Y (%H:%M)"`
 echo -e "\n\nStarting script at: ${start_date}\n"
 
-module load R/4.0.3 ## Optional
+# module load R/4.0.3 ## Optional
 
 ## Regimes de temps
 varname="slp"
-fname=/mypath/myfileref.nc
-seas=DJF
+fname="inst/extdata/SLP_IPSLCM5MR_19500101_19991231_daily.nc"
+seas="DJF"
 nreg=4
-fout=/mypath/myfileWR.Rdata
+fout="myfileWR.Rdata"
 
-R CMD "--args ${fname} ${seas} ${varname} ${nreg} ${fout}" regimes_IPSL.R
+R CMD BATCH $"--args ${fname} ${seas} ${varname} ${nreg} ${fout}" regimes_IPSL.R
 
 ## Classification sur les regimes de temps
-fname=/mypath/myfile.nc
-freg=/mypath/myfileWR.Rdata
-fout=/mypath/myfile_classif.Rdata
+fname="inst/extdata/SLP_IPSLCM5MR_19500101_19991231_daily.nc"
+freg="myfileWR.Rdata"
+fout="myfileCl.txt"
 
 R CMD BATCH "--args ${fname} ${varname} ${freg} ${fout}" classif_IPSL.R
 

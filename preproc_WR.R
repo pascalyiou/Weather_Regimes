@@ -6,6 +6,7 @@
 "sousseasmean"<-function(dat,conv.time,l.mon=1:12,
                          l.year=unique(conv.time$year),rprint=FALSE)
 {
+    conv.time = as.data.frame(conv.time)
     dat.m=dat
     seas.cyc=c()
     time.cyc=c()
@@ -32,9 +33,15 @@
 ## Soustraction du cycle saisonnier
     if(rprint) print("Seasonal anomalies")
     for(t in 1:nrow(dat)){
+        print(conv.time[t, ])
         mon=conv.time$month[t]
         day=conv.time$day[t]
         ii= which(time.cyc$month %in% mon & time.cyc$day %in% day)
+        print(paste0("t = ", t, ", ii = ", ii))
+        print(mon)
+        print(which(time.cyc$month %in% mon))
+        print(day)
+        print(which(time.cyc$day %in% day))
         dat.m[t,]=dat[t,]-seas.cyc.spl[ii,]
     }
     datsub=list(anom=dat.m,seascyc=list(seascyc=seas.cyc.spl,timecyc=time.cyc))

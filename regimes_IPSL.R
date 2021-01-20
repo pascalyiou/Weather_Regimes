@@ -6,13 +6,7 @@
 ## Il faut avoir installe les librairies: ncdf4, Mclust, maps
 ## > install.packages(c("ncdf4","mclust","maps"), dependencies=TRUE)
 library(ncdf4)
-SI=Sys.info()
-if(SI[[1]] == "Darwin"){
-  Rsource="/Users/yiou/programs/RStat/WREGIMES/"
-}
-if(SI[[1]] == "Linux"){
-  Rsource="/home/users/yiou/RStat/WREGIMES/"
-}
+Rsource="./"
 
 ## Parametres de l'analyse
 args=(commandArgs(TRUE))
@@ -23,13 +17,13 @@ if(length(args)>0){
     seas=args[i];i=i+1 ## Saison d'analyse
     varname=args[i];i=i+1 ## Variable a analyser
     nreg=as.integer(args[i]);i=i+1 ## Nombre de regimes
-    fout=args[i];i=iBonjour +1 ## Fichier de sortie
+    fout=args[i] ## Fichier de sortie
 }else{
-    fname="nom_de_simu.nc"
+    fname="inst/extdata/SLP_IPSLCM5MR_19500101_19991231_daily.nc"
     seas="DJF"
     varname="slp"
     nreg=4
-    fout="nom_de_resultat.Rdata"
+    fout="myfileWR.Rdata"
 }
 
 ## Initialisation des fonctions
@@ -39,16 +33,18 @@ source(paste(Rsource,"preproc_WR.R",sep="")) ## Calcul des cycles saisonniers
 source(paste(Rsource,"compu_WR.R",sep="")) ## Calcul des regimes
 
 ## Definitions des saisons
-l.seas=list(JJA=6:8,SON=9:11,DJF=c(12,1,2),MAM=c(3,4,5),
-            SONDJF=c(9:12,1,2),JJAS=6:9,NDJFM=c(11,12,1,2,3))
+env_seas = new.env()
+source("def_seasons.R", local = env_seas)
+l.seas = env_seas$l.seas
+
 
 ## Lecture des donnees a classer dans un fichier ncdf
-datMOD = readipslnc(varname=varname,fname,yr.range=c(1950,2000),ical=360))
-
-## Soustraction du cycle saisonnier & calcul d'anomalies saisonnieres
-dat.MOD.dum=sousseasmean(datMOD$dat,datMOD$conv.time)
-
+datMOD = readipslnc(varname=varname,fname,yr.range=c(1950,1999),ical=365)
 dat.MOD.time = datMOD$time
+## Soustraction du cycle saisonnier & calcul d'anomalies saisonnieres
+# debug(sousseasmean)
+dat.MOD.dum=sousseasmean(datMOD$dat,datMOD$time)
+
 
 datMOD$anom=dat.MOD.dum$anom
 datMOD$seascyc=dat.MOD.dum$seascyc
@@ -59,17 +55,16 @@ scale.z500=rep(pond.z500,length(datMOD$lon))
 
 ## Selection des jours correspondant a la saison seas
 ISEAS=which(datMOD$time$month %in% l.seas[[seas]])
-dat.m=datMODP$anom[ISEAS,]
+dat.m=datMOD$anom[ISEAS,]
 
 ## Calcul des PCs
 pc.dat=prcomp(dat.m,scale.=scale.z500)
 
 ## Calcul des regimes et classification
-dat.class=classnorm(pc.dat,nreg=nreg,lon=lon,lat=lat)
+dat.class=classnorm(pc.dat,nreg=nreg,lon=datMOD$lon,lat=datMOD$lat)
 
 ## Sauvegarde dans f.out au format Rdat
 save(file=fout,dat.class,pc.dat,nreg,fname,seas,dat.MOD.time,ISEAS,
      l.seas,varname)
 
-q("no")
 
