@@ -35,22 +35,22 @@
 }
 
 ## Extraction d'une matrice a partir d'un fichier netcdf
-"extractnc" <- function(nc,varnc,ISEAS=NULL,ndims,varsize=NULL)
+"extractnc" <- function(nc, varnc)
 {
 ## Lecture des donnees de la saison ISEAS pour l'annee year
-    dat.all=ncvar_get(nc,varnc)
-    if(is.null(ISEAS)) ISEAS=1:length(dat.all[1,1,])
-    data3=dat.all[,,ISEAS]
-    if(is.null(varsize)){
-        nx=dim(dat.all)[2];ny=dim(dat.all)[1]
-    }else
-    {nx=varsize[1];ny=varsize[2];}
-    rm(dat.all)
+    dat=ncvar_get(nc,varnc)
+    dat.dim=dim(dat)
+    if(length(dat.dim) != 3) stop(paste0("varnc, ", varnc, " must have 3 dimensions: lon, lat, time"))
+    if(is.null(ISEAS)){
+      ISEAS=1:dat.dim[3]
+    }
     nt=length(ISEAS)
-## Remise dans l'ordre lat-lon-temps
-    dat = data3*NA; dim(dat) <- c(nt,ny,nx)
-    for (i in 1:nt) dat[i,,] <- t(as.matrix(data3[,,i]))
-## On prefere les tableaux a deux dimensions
+    nx=dat.dim[1]
+    ny=dat.dim[2]
+    dat=dat[,,ISEAS]
+    ## Remise dans l'ordre temps-lon-lat
+    dat=aperm(dat, c(3, 1, 2))
+    ## On prefere les tableaux a deux dimensions temps-position
     dim(dat)=c(nt,nx*ny)
     invisible(dat)
 }
@@ -70,6 +70,8 @@
     lat=nclat$vals
 ##Traitement du temps: creation d'un calendrier a 360 ou 365 jours
     itime=nc$dim[["time_counter"]]$vals
+    dat=extractnc(nc,varnc,NULL)
+    nc_close(nc)
     if(ical==360){
         ndyear=360
         nmyear=12
@@ -82,24 +84,21 @@
 
     }
     if(ical==365){
-        year=c()
-        month=c()
-        day=c()
+        year=month=day=integer(nrow(dat))
         monthdum=c(rep(1,31),rep(2,28),rep(3,31),rep(4,30),rep(5,31),rep(6,30),
                    rep(7,31),rep(8,31),rep(9,30),rep(10,31),rep(11,30),
                    rep(12,31))
         daydum=c((1:31),(1:28),(1:31),(1:30),(1:31),(1:30),(1:31),(1:31),
         (1:30),(1:31),(1:30),(1:31))
-        for(yr in yr.range[1]:yr.range[2]){
-            year=c(year,rep(yr,length=length(monthdum)))
-            month=c(month,monthdum)
-            day=c(day,daydum)
-        }
+        ndyear=length(daydum)
+
+        nyear=yr.range[2]-yr.range[1]+1
+        year=rep(yr.range[1]:yr.range[2],each=ndyear)
+        month=rep(monthdum,times=nyear)
+        day=rep(daydum,times=nyear)
     }
     conv.time=data.frame(year=year, month=month, day=day)
 
-    dat=extractnc(nc,varnc,NULL,ndims,varsize)
-    nc_close(nc)
     data.nc=list(lon=lon,lat=lat,dat=dat,time=conv.time)
     invisible(data.nc)
 }

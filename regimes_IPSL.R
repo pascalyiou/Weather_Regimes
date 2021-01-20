@@ -61,6 +61,7 @@ dat.m=datMOD$anom[ISEAS,]
 pc.dat=prcomp(dat.m,scale.=scale.z500)
 
 ## Calcul des regimes et classification
+#debug(classnorm)
 dat.class=classnorm(pc.dat,nreg=nreg,lon=datMOD$lon,lat=datMOD$lat)
 
 ## Sauvegarde dans f.out au format Rdat

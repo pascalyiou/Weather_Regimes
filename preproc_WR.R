@@ -37,11 +37,6 @@
         mon=conv.time$month[t]
         day=conv.time$day[t]
         ii= which(time.cyc$month %in% mon & time.cyc$day %in% day)
-        print(paste0("t = ", t, ", ii = ", ii))
-        print(mon)
-        print(which(time.cyc$month %in% mon))
-        print(day)
-        print(which(time.cyc$day %in% day))
         dat.m[t,]=dat[t,]-seas.cyc.spl[ii,]
     }
     datsub=list(anom=dat.m,seascyc=list(seascyc=seas.cyc.spl,timecyc=time.cyc))
