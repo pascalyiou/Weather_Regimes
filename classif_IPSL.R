@@ -41,8 +41,7 @@ seas = env_inputs$seas
 nreg = env_inputs$nreg
 
 ## Lecture des données de pression/Z500 sur les autres simulations
-dat.IPSL = readipslnc(fname=fname, varname=varname,ical=365,
-                      yr.range=c(1950,1999))
+dat.IPSL = readnc(fname=fname, varname=varname)
 
 ## "readipslnc" <- function(varname="t2m",fname,yr.range,ical=360)
 
@@ -57,12 +56,11 @@ dat.IPSL$seascyc=dat.IPSL.dum$seascyc
 I.seas=which(dat.IPSL.time$month %in% l.seas[[seas]])
 
 ## Calcul des distances a chaque WR identifie (nreg)
-Xdiff=c()
+Xdiff=matrix(NA, nrow=length(I.seas), ncol=nreg)
 for(i in 1:nreg){
   dum=t(t(dat.IPSL$anom[I.seas,])-dat.class$reg.var[,i])
   dum=dum^2
-  sdum=apply(dum,1,sum)/ncol(dum)
-  Xdiff=cbind(Xdiff,sqrt(sdum))
+  Xdiff[, i]=apply(dum,1,sum)/ncol(dum)
 }
 ## Determination du regime le plus proche: classification
 class.Xdiff=apply(Xdiff,1,which.min)

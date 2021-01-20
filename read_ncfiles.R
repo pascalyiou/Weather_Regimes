@@ -5,49 +5,15 @@
 ## Mise a jour Janvier 2021
 ## demande d'avoir fait: library(ncdf4)
 
-## Lecture des donnees, longitude-latitude, temps, scaling
-"lirevarnc" <- function(nc,varname,n.lon="lon",n.lat="lat",n.time="time",
-  scaling=c(1,0),y.ref=1800)
-{
-    varnc=nc$var[[varname]]
-    varsize=varnc$varsize
-    ndims=varnc$ndims
-## Extraction des longitudes, latitudes et du temps
-    nclon=nc$dim[[n.lon]]
-    lon.dat=nclon$vals
-    nclat=nc$dim[[n.lat]]
-    lat.dat=nclat$vals
-## Traitement du temps
-    nctime = nc$dim[[n.time]]
-    time=nctime$vals
-    conv.time.dat=caldat(time/24+julday(1,1,y.ref))
-## Conversion en yyyymmdd    
-    time.dat=conv.time.dat$year*10000+conv.time.dat$month*100+
-      conv.time.dat$day
-## Lecture du fichier netcdf
-    dat.m=extractnc(nc,varnc)
-## Scaling des donnees    
-    dat.m=dat.m/scaling[1]-scaling[2]
-    datout=list(dat=dat.m,lon=lon.dat,lat=lat.dat,
-      time=time.dat,conv.time=conv.time.dat,timenc=time)
-    rm(dat.m)
-    invisible(datout)
-}
-
 ## Extraction d'une matrice a partir d'un fichier netcdf
 "extractnc" <- function(nc, varnc)
 {
-## Lecture des donnees de la saison ISEAS pour l'annee year
     dat=ncvar_get(nc,varnc)
     dat.dim=dim(dat)
     if(length(dat.dim) != 3) stop(paste0("varnc, ", varnc, " must have 3 dimensions: lon, lat, time"))
-    if(is.null(ISEAS)){
-      ISEAS=1:dat.dim[3]
-    }
-    nt=length(ISEAS)
+    nt=dat.dim[3]
     nx=dat.dim[1]
     ny=dat.dim[2]
-    dat=dat[,,ISEAS]
     ## Remise dans l'ordre temps-lon-lat
     dat=aperm(dat, c(3, 1, 2))
     ## On prefere les tableaux a deux dimensions temps-position
@@ -57,8 +23,9 @@
 
 ## Routine de lecture d'un fichier ncdf provenant du modele de l'IPSL
 ## creation d'un calendrier de 360 jours
-"readipslnc" <- function(varname="t2m",fname,yr.range,ical=360)
+"readnc" <- function(varname, fname)
 {
+    require(ncdf4.helpers)
     nc = nc_open(fname) #open.ncdf(fname)
     varnc=nc$var[[varname]]
     varsize=varnc$varsize
@@ -70,42 +37,38 @@
     lat=nclat$vals
 ##Traitement du temps: creation d'un calendrier a 360 ou 365 jours
     itime=nc$dim[["time_counter"]]$vals
-    dat=extractnc(nc,varnc,NULL)
-    nc_close(nc)
-    if(ical==360){
-        ndyear=360
-        nmyear=12
-        lmo=1:12
-
-        nyear=yr.range[2]-yr.range[1]+1
-        day=rep(1:30,times=nmyear*nyear)
-        month=rep(rep(lmo,each=30),times=nyear)
-        year=rep(yr.range[1]:yr.range[2],each=ndyear)
-
+    dat=extractnc(nc,varnc)
+    ts=nc.get.time.series(nc)
+    cal=attr(ts, "cal")
+    yyyymmdd=as.character(ts, format="%Y%m%d")
+    if(cal == "360"){
+      yyyymmdd=cal360_30dbm(yyyymmdd)
     }
-    if(ical==365){
-        year=month=day=integer(nrow(dat))
-        monthdum=c(rep(1,31),rep(2,28),rep(3,31),rep(4,30),rep(5,31),rep(6,30),
-                   rep(7,31),rep(8,31),rep(9,30),rep(10,31),rep(11,30),
-                   rep(12,31))
-        daydum=c((1:31),(1:28),(1:31),(1:30),(1:31),(1:30),(1:31),(1:31),
-        (1:30),(1:31),(1:30),(1:31))
-        ndyear=length(daydum)
-
-        nyear=yr.range[2]-yr.range[1]+1
-        year=rep(yr.range[1]:yr.range[2],each=ndyear)
-        month=rep(monthdum,times=nyear)
-        day=rep(daydum,times=nyear)
-    }
-    conv.time=data.frame(year=year, month=month, day=day)
-
-    data.nc=list(lon=lon,lat=lat,dat=dat,time=conv.time)
+    time=data.frame(
+      year=as.numeric(substr(yyyymmdd, 1, 4)),
+      month=as.numeric(substr(yyyymmdd, 5, 6)),
+      day=as.numeric(substr(yyyymmdd, 7, 8))
+    )
+    data.nc=list(lon=lon,lat=lat,dat=dat,time=time)
     invisible(data.nc)
 }
 ## end function
 
-
-
+# TODO: need to be tested.
+"cal360_30dbm" <- function(yyyymmdd_PCICt){
+  day360=rep(1:30,times=12)
+  month360=rep(1:12, each=30)
+  dayPCICt=c(1:30, 1:28, 1:31, 1:30, 1:30, 1:30, 1:30, 1:31, 1:30, 1:30, 1:30, 1:30)
+  monthPCICt=rep(1:12,  c(30, 28, 31, 30, 30,30, 30, 31, 30, 30, 30, 30))
+  convtable=data.frame(
+   "PCICt" = sprintf("%02d%02d", monthPCICt, dayPCICt),
+   "360" = sprintf("%02d%02d", month360, day360)
+  )
+  mmdd_PCICt=substr(yyyymmdd_PCICt, 5, 8)
+  yyyy_PCICt=substr(yyyymmdd_PCICt, 1, 4)
+  imatch = match(mmdd_PCICt, convtable$PCICt)
+  return(paste0(yyyy_PCICt, convtable$"360"[imatch]))
+}
 
 ## The function computes month, day, and year from Julian days. 
 "caldat" <- function (julian) 

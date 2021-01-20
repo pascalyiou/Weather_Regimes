@@ -6,23 +6,18 @@
 "sousseasmean"<-function(dat,conv.time,l.mon=1:12,
                          l.year=unique(conv.time$year),rprint=FALSE)
 {
-    conv.time = as.data.frame(conv.time)
-    dat.m=dat
-    seas.cyc=c()
-    time.cyc=c()
-## Calcul du cycle saisonnier pour une liste d'annees dans l.year
+    time.cyc = unique(conv.time[, c("month", "day")])
+    seas.cyc = matrix(NA, nrow = nrow(time.cyc), ncol = ncol(dat))
+    ## Calcul du cycle saisonnier pour une liste d'annees dans l.year
     if(rprint) print("Seasonal cycle")
-    for(mon in l.mon){
-        r.day=range(conv.time$day[conv.time$month==mon])
-        for(day in r.day[1]:r.day[2]){
-            m.day=apply(dat[conv.time$day==day & conv.time$month==mon &
-                            conv.time$year %in% l.year,],2,mean,na.rm=TRUE)
-            seas.cyc=rbind(seas.cyc,m.day)
-            time.cyc$month=c(time.cyc$month,mon)
-            time.cyc$day=c(time.cyc$day,day)
-        }
+    for(irow in seq.int(nrow(time.cyc))){
+      isubset = (conv.time$day==time.cyc$day[irow] &
+        conv.time$month==time.cyc$month[irow] &
+        conv.time$year %in% l.year
+      )
+      seas.cyc[irow, ]=apply(dat[isubset,], 2, mean, na.rm = TRUE)
     }
-## Lissage par spline du cycle saisonnier avec preservation des derivees aux bords
+    ## Lissage par spline du cycle saisonnier avec preservation des derivees aux bords
     if(rprint) print("Seasonal cycle smoothing")
     seas.cyc.spl=rbind(seas.cyc,seas.cyc,seas.cyc)
     for(i in 1:ncol(seas.cyc)){
@@ -32,14 +27,13 @@
 
 ## Soustraction du cycle saisonnier
     if(rprint) print("Seasonal anomalies")
-    for(t in 1:nrow(dat)){
-        print(conv.time[t, ])
-        mon=conv.time$month[t]
-        day=conv.time$day[t]
-        ii= which(time.cyc$month %in% mon & time.cyc$day %in% day)
-        dat.m[t,]=dat[t,]-seas.cyc.spl[ii,]
+    for(irow in seq.int(nrow(time.cyc))){
+        mon=time.cyc$month[irow]
+        day=time.cyc$day[irow]
+        ii= which(conv.time$month == mon & conv.time$day == day)
+        dat[ii,]=sweep(dat[ii,], 2, seas.cyc.spl[irow,])
     }
-    datsub=list(anom=dat.m,seascyc=list(seascyc=seas.cyc.spl,timecyc=time.cyc))
+    datsub=list(anom=dat,seascyc=list(seascyc=seas.cyc.spl,timecyc=time.cyc))
     invisible(datsub)
 }# fin de la definition de fonction
 
