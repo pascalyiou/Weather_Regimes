@@ -2,10 +2,7 @@
 ## Pascal Yiou (LSCE), Jan. 2021
 ## Peut se lancer en batch par:
 ## R CMD BATCH "--args fname freg fout" classif_IPSL.R
-
-library(ncdf4)
-
-Rsource="./"
+library(Weather_Regimes)
 
 ## Parametres de l'analyse
 args=(commandArgs(TRUE))
@@ -23,18 +20,14 @@ if(length(args)>0){
     fout="myfileCl.txt"
 }
 
-## Initialisation des fonctions
-source(paste(Rsource,"read_ncfiles.R",sep="")) ## Lecture des fichiers ncdf
-source(paste(Rsource,"preproc_WR.R",sep="")) ## Calcul des cycles saisonniers
-
 ## Definitions des saisons
-env_seas = new.env()
-source("def_seasons.R", local = env_seas)
+env_seas = new.env(parent = emptyenv())
+source(system.file("inst", "scripts", "def_seasons.R", package="Weather_Regime"), local = env_seas)
 l.seas = env_seas$l.seas
 
 ## Lecture des regimes sur la simulation de controle
 # save(file=fout,dat.class,pc.dat,nreg,fname,seas,dat.MOD.time,ISEAS,
-env_inputs = new.env()
+env_inputs = new.env(parent = emptyenv())
 load(freg, envir = env_inputs)
 dat.class = env_inputs$dat.class
 seas = env_inputs$seas

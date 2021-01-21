@@ -62,12 +62,13 @@
   monthPCICt=rep(1:12,  c(30, 28, 31, 30, 30,30, 30, 31, 30, 30, 30, 30))
   convtable=data.frame(
    "PCICt" = sprintf("%02d%02d", monthPCICt, dayPCICt),
-   "360" = sprintf("%02d%02d", month360, day360)
+   "cal360" = sprintf("%02d%02d", month360, day360)
   )
   mmdd_PCICt=substr(yyyymmdd_PCICt, 5, 8)
   yyyy_PCICt=substr(yyyymmdd_PCICt, 1, 4)
   imatch = match(mmdd_PCICt, convtable$PCICt)
-  return(paste0(yyyy_PCICt, convtable$"360"[imatch]))
+  if(is.na(imatch)) stop("no corresponding date found")
+  return(paste0(yyyy_PCICt, convtable$cal360[imatch]))
 }
 
 ## The function computes month, day, and year from Julian days. 

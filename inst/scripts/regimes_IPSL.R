@@ -5,8 +5,8 @@
 ## Cette commande peut etre incluse dans un script sh
 ## Il faut avoir installe les librairies: ncdf4, Mclust, maps
 ## > install.packages(c("ncdf4","mclust","maps"), dependencies=TRUE)
-library(ncdf4)
-Rsource="./"
+
+library(Weather_Regimes)
 
 ## Parametres de l'analyse
 args=(commandArgs(TRUE))
@@ -26,28 +26,22 @@ if(length(args)>0){
     fout="myfileWR.Rdata"
 }
 
-## Initialisation des fonctions
-source(paste(Rsource,"imagecont_WR.R",sep="")) ## Pour tracer les resultats
-source(paste(Rsource,"read_ncfiles.R",sep="")) ## Lecture des fichiers ncdf
-source(paste(Rsource,"preproc_WR.R",sep="")) ## Calcul des cycles saisonniers
-source(paste(Rsource,"compu_WR.R",sep="")) ## Calcul des regimes
-
 ## Definitions des saisons
-env_seas = new.env()
-source("def_seasons.R", local = env_seas)
+env_seas = new.env(parent = emptyenv())
+source(system.file("inst", "scripts", "def_seasons.R", package="Weather_Regime"), local = env_seas)
 l.seas = env_seas$l.seas
 
 
 ## Lecture des donnees a classer dans un fichier ncdf
 dat.IPSL = readnc(varname=varname,fname)
-dat.MOD.time = dat.IPSL$time
+dat.IPSL.time = dat.IPSL$time
 ## Soustraction du cycle saisonnier & calcul d'anomalies saisonnieres
 # debug(sousseasmean)
-dat.MOD.dum=sousseasmean(dat.IPSL$dat,dat.IPSL$time)
+dat.IPSL.dum=sousseasmean(dat.IPSL$dat,dat.IPSL$time)
 
 
-dat.IPSL$anom=dat.MOD.dum$anom
-dat.IPSL$seascyc=dat.MOD.dum$seascyc
+dat.IPSL$anom=dat.IPSL.dum$anom
+dat.IPSL$seascyc=dat.IPSL.dum$seascyc
 
 ## Calcul des poids sur la latitude pour le calcul des PC/EOF
 pond.z500=1/sqrt(cos(dat.IPSL$lat*pi/180))
@@ -65,7 +59,7 @@ pc.dat=prcomp(dat.m,scale.=scale.z500)
 dat.class=classnorm(pc.dat,nreg=nreg)
 
 ## Sauvegarde dans f.out au format Rdat
-save(file=fout,dat.class,pc.dat,nreg,fname,seas,dat.MOD.time,ISEAS,
+save(file=fout,dat.class,pc.dat,nreg,fname,seas,dat.IPSL.time,ISEAS,
      l.seas,varname)
 
 
