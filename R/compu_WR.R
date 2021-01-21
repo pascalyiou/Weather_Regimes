@@ -13,7 +13,6 @@
 
 "classnorm"=function(pc.dat, nreg=4, npc=10, nsim=200)
 {
-    require(mclust)
     ## Classification par kmeans
     ## On effectue nsim=100 classifications et on recupere les centroides
     if(class(pc.dat)=="princomp"){

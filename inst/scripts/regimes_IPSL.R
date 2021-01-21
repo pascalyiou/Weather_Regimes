@@ -6,7 +6,7 @@
 ## Il faut avoir installe les librairies: ncdf4, Mclust, maps
 ## > install.packages(c("ncdf4","mclust","maps"), dependencies=TRUE)
 
-library(Weather_Regimes)
+library(WeatherRegimes)
 
 ## Parametres de l'analyse
 args=(commandArgs(TRUE))
@@ -19,7 +19,7 @@ if(length(args)>0){
     nreg=as.integer(args[i]);i=i+1 ## Nombre de regimes
     fout=args[i] ## Fichier de sortie
 }else{
-    fname="inst/extdata/SLP_IPSLCM5MR_19500101_19991231_daily.nc"
+    fname=system.file("extdata", "SLP_IPSLCM5MR_19500101_19991231_daily.nc", package="WeatherRegimes")
     seas="DJF"
     varname="slp"
     nreg=4
@@ -27,8 +27,9 @@ if(length(args)>0){
 }
 
 ## Definitions des saisons
-env_seas = new.env(parent = emptyenv())
-source(system.file("inst", "scripts", "def_seasons.R", package="Weather_Regime"), local = env_seas)
+env_seas = new.env()
+rfile=system.file("scripts", "def_seasons.R", package="WeatherRegimes")
+source(rfile, local = env_seas)
 l.seas = env_seas$l.seas
 
 

@@ -29,12 +29,10 @@
           col=col10[length(col10):1],
           xlab=xlab,ylab=ylab,main=titre,breaks=zlev,add=TRUE)
     if(paquet=="fields"){
-        library(fields)
-        world(add=TRUE)
+        fields::world(add=TRUE)
     }
     if(paquet=="maps"){
-        library(maps)
-        map(add=TRUE)
+        maps::map(add=TRUE)
     }
     if(legend) image.plot(dum[,length(latF):1],col=col10[length(col10):1],
                           legend.only=TRUE,zlim=range(zlev))
@@ -61,11 +59,9 @@
             xlab=xlab,ylab=ylab,main=titre,col=col,add=add,nlevels=nlev,
             levels=zlev,lty=lty)
     if(paquet=="fields"){
-        library(fields)
-        world(xlim=range(lonF),ylim=range(latF),add=TRUE)}
+      fields::world(xlim=range(lonF),ylim=range(latF),add=TRUE)}
     if(paquet=="maps"){
-        library(maps)
-        map(add=TRUE)
+      maps::map(add=TRUE)
     }
 }
 
@@ -97,11 +93,9 @@
             xlab=xlab,ylab=ylab,main=titre,col=colo,add=add,nlevels=nlev,
             levels=zlev,lty=llty,lwd=llwd)
     if(paquet=="fields"){
-        library(fields)
-        world(xlim=range(lonF),ylim=range(latF),add=TRUE)}
+        fields::world(xlim=range(lonF),ylim=range(latF),add=TRUE)}
     if(paquet=="maps"){
-        library(maps)
-        map(add=TRUE)
+        maps::map(add=TRUE)
     }
 }
 

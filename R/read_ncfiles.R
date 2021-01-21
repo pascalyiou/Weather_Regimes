@@ -25,7 +25,6 @@
 ## creation d'un calendrier de 360 jours
 "readnc" <- function(varname, fname)
 {
-    require(ncdf4.helpers)
     nc = nc_open(fname) #open.ncdf(fname)
     varnc=nc$var[[varname]]
     varsize=varnc$varsize
@@ -40,6 +39,7 @@
     dat=extractnc(nc,varnc)
     ts=nc.get.time.series(nc)
     cal=attr(ts, "cal")
+    nc = nc_close(nc) #open.ncdf(fname)
     yyyymmdd=as.character(ts, format="%Y%m%d")
     if(cal == "360"){
       yyyymmdd=cal360_30dbm(yyyymmdd)

@@ -13,22 +13,25 @@ start_date=`date +"%m/%d/%Y (%H:%M)"`
 echo -e "\n\nStarting script at: ${start_date}\n"
 
 # module load R/4.0.3 ## Optional
+wr_folder=$(Rscript -e 'system.file(package="WeatherRegimes")' | sed 's/.*"\(.*\)".*/\1/')
+echo $wr_folder
+
 
 ## Regimes de temps
 varname="slp"
-fname="inst/extdata/SLP_IPSLCM5MR_19500101_19991231_daily.nc"
+fname="$wr_folder/extdata/SLP_IPSLCM5MR_19500101_19991231_daily.nc"
 seas="DJF"
 nreg=4
 fout="myfileWR.Rdata"
 
-R CMD BATCH $"--args ${fname} ${seas} ${varname} ${nreg} ${fout}" regimes_IPSL.R
+Rscript --vanilla $wr_folder/scripts/regimes_IPSL.R ${fname} ${seas} ${varname} ${nreg} ${fout} 
 
 ## Classification sur les regimes de temps
-fname="inst/extdata/SLP_IPSLCM5MR_19500101_19991231_daily.nc"
+fname="$wr_folder/extdata/SLP_IPSLCM5MR_19500101_19991231_daily.nc"
 freg="myfileWR.Rdata"
 fout="myfileCl.txt"
 
-R CMD BATCH "--args ${fname} ${varname} ${freg} ${fout}" classif_IPSL.R
+Rscript --vanilla $wr_folder/scripts/classif_IPSL.R ${fname} ${varname} ${freg} ${fout} 
 
 end_date=`date +"%m/%d/%Y (%H:%M)"`
 echo -e "\nScript finished at: ${end_date}\n"

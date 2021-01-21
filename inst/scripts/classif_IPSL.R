@@ -2,7 +2,7 @@
 ## Pascal Yiou (LSCE), Jan. 2021
 ## Peut se lancer en batch par:
 ## R CMD BATCH "--args fname freg fout" classif_IPSL.R
-library(Weather_Regimes)
+library(WeatherRegimes)
 
 ## Parametres de l'analyse
 args=(commandArgs(TRUE))
@@ -14,15 +14,15 @@ if(length(args)>0){
     freg=args[i];i=i+1 ## Fichier des regimes de reference
     fout=args[i];i=i+1 ## Fichier de sortie
 }else{
-    fname="inst/extdata/SLP_IPSLCM5MR_19500101_19991231_daily.nc"
+    fname=system.file("extdata", "SLP_IPSLCM5MR_19500101_19991231_daily.nc", package="WeatherRegimes")
     varname="slp"
     freg="myfileWR.Rdata"
     fout="myfileCl.txt"
 }
 
 ## Definitions des saisons
-env_seas = new.env(parent = emptyenv())
-source(system.file("inst", "scripts", "def_seasons.R", package="Weather_Regime"), local = env_seas)
+env_seas = new.env()
+source(system.file("scripts", "def_seasons.R", package="WeatherRegimes"), local = env_seas)
 l.seas = env_seas$l.seas
 
 ## Lecture des regimes sur la simulation de controle
@@ -41,7 +41,7 @@ dat.IPSL = readnc(fname=fname, varname=varname)
 ## Soustraction du cycle saisonnier & calcul d'anomalies saisonnieres
 dat.IPSL.dum=sousseasmean(dat.IPSL$dat,dat.IPSL$time)
 
-dat.IPSL.time = dat.IPSL$time
+dat.IPSL.time=dat.IPSL$time
 
 dat.IPSL$anom=dat.IPSL.dum$anom
 dat.IPSL$seascyc=dat.IPSL.dum$seascyc
