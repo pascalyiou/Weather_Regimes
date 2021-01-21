@@ -67,7 +67,7 @@
   mmdd_PCICt=substr(yyyymmdd_PCICt, 5, 8)
   yyyy_PCICt=substr(yyyymmdd_PCICt, 1, 4)
   imatch = match(mmdd_PCICt, convtable$PCICt)
-  if(is.na(imatch)) stop("no corresponding date found")
+  if(any(is.na(imatch))) stop("at least one date with no correspondance date found")
   return(paste0(yyyy_PCICt, convtable$cal360[imatch]))
 }
 
