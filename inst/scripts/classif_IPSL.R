@@ -13,6 +13,7 @@ if(length(args)>0){
     varname=args[i];i=i+1 ## Variable d'analyse
     freg=args[i];i=i+1 ## Fichier des regimes de reference
     fout=args[i];i=i+1 ## Fichier de sortie
+    if(any(is.na(args[seq.int(i)]))) stop("at least one argument is missing")
 }else{
     fname=system.file("extdata", "SLP_IPSLCM5MR_19500101_19991231_daily.nc", package="WeatherRegimes")
     varname="slp"
@@ -51,9 +52,9 @@ I.seas=which(dat.IPSL.time$month %in% l.seas[[seas]])
 ## Calcul des distances a chaque WR identifie (nreg)
 Xdiff=matrix(NA, nrow=length(I.seas), ncol=nreg)
 for(i in 1:nreg){
-  dum=t(t(dat.IPSL$anom[I.seas,])-dat.class$reg.var[,i])
+  dum=t(t(dat.IPSL$anom[I.seas,])-dat.class$reg.var[i,])
   dum=dum^2
-  Xdiff[, i]=apply(dum,1,sum)/ncol(dum)
+  Xdiff[, i]=apply(dum,1,mean)
 }
 ## Determination du regime le plus proche: classification
 class.Xdiff=apply(Xdiff,1,which.min)

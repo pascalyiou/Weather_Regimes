@@ -18,6 +18,7 @@ if(length(args)>0){
     varname=args[i];i=i+1 ## Variable a analyser
     nreg=as.integer(args[i]);i=i+1 ## Nombre de regimes
     fout=args[i] ## Fichier de sortie
+    if(any(is.na(args[seq.int(i)]))) stop("at least one argument is missing")
 }else{
     fname=system.file("extdata", "SLP_IPSLCM5MR_19500101_19991231_daily.nc", package="WeatherRegimes")
     seas="DJF"

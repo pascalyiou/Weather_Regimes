@@ -50,12 +50,11 @@
     kmeans.dat=kmeans(pc,dum[II[1:nreg],])
 
     ## Calcul des regimes dans l'espace physique
-    reg.var.kmeans=rot %*% t(kmeans.dat$centers)
+    reg.var.kmeans=kmeans.dat$centers %*% t(rot)
     ## Frequence de chaque regime
     perc.r=numeric(nreg)
     for(i in 1:nreg){
-      perc.r=c(perc.r,length(which(kmeans.dat$cluster==i))/
-                                   length(kmeans.dat$cluster)*100)
+      perc.r[i]=mean(kmeans.dat$cluster==i)*100
     }
     classif.out=list(kmeans=kmeans.dat,reg.var=reg.var.kmeans,
                      perc.r=perc.r)

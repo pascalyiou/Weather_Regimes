@@ -12,12 +12,12 @@ set -o pipefail
 start_date=`date +"%m/%d/%Y (%H:%M)"`
 echo -e "\n\nStarting script at: ${start_date}\n"
 
-# module load R/4.0.3 ## Optional
+# Retrieve location of the installed R package WeatherRegimes
 wr_folder=$(Rscript -e 'system.file(package="WeatherRegimes")' | sed 's/.*"\(.*\)".*/\1/')
 echo $wr_folder
 
 
-## Regimes de temps
+## Calcul des representants des regimes de temps
 varname="slp"
 fname="$wr_folder/extdata/SLP_IPSLCM5MR_19500101_19991231_daily.nc"
 seas="DJF"
@@ -26,7 +26,8 @@ fout="myfileWR.Rdata"
 
 Rscript --vanilla $wr_folder/scripts/regimes_IPSL.R ${fname} ${seas} ${varname} ${nreg} ${fout} 
 
-## Classification sur les regimes de temps
+## Classification en regimes de temps
+varname="slp"
 fname="$wr_folder/extdata/SLP_IPSLCM5MR_19500101_19991231_daily.nc"
 freg="myfileWR.Rdata"
 fout="myfileCl.txt"
