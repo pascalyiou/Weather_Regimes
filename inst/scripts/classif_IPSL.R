@@ -12,7 +12,7 @@ if(length(args)>0){
     fname=args[i];i=i+1 ## Fichier d'entree
     varname=args[i];i=i+1 ## Variable d'analyse
     freg=args[i];i=i+1 ## Fichier des regimes de reference
-    fout=args[i];i=i+1 ## Fichier de sortie
+    fout=args[i]; ## Fichier de sortie
     if(any(is.na(args[seq.int(i)]))) stop("at least one argument is missing")
 }else{
     fname=system.file("extdata", "SLP_IPSLCM5MR_19500101_19991231_daily.nc", package="WeatherRegimes")
@@ -36,7 +36,7 @@ nreg = env_inputs$nreg
 
 ## Lecture des données de pression/Z500 sur les autres simulations
 dat.IPSL = readnc(fname=fname, varname=varname)
-
+if(ncol(dat.IPSL$dat) != ncol(dat.class$reg.var)) stop("lon/lat dimensions not matching between the input data and the weather regime medoids")
 ## "readipslnc" <- function(varname="t2m",fname,yr.range,ical=360)
 
 ## Soustraction du cycle saisonnier & calcul d'anomalies saisonnieres
@@ -47,21 +47,22 @@ dat.IPSL.time=dat.IPSL$time
 dat.IPSL$anom=dat.IPSL.dum$anom
 dat.IPSL$seascyc=dat.IPSL.dum$seascyc
 
-I.seas=which(dat.IPSL.time$month %in% l.seas[[seas]])
+iseas=which(dat.IPSL.time$month %in% l.seas[[seas]])
+if(length(iseas) == 0) stop("no data found for the selected season")
 
 ## Calcul des distances a chaque WR identifie (nreg)
-Xdiff=matrix(NA, nrow=length(I.seas), ncol=nreg)
+Xdiff=matrix(NA, nrow=length(iseas), ncol=nreg)
 for(i in 1:nreg){
-  dum=t(t(dat.IPSL$anom[I.seas,])-dat.class$reg.var[i,])
+  dum=t(t(dat.IPSL$anom[iseas,])-dat.class$reg.var[i,])
   dum=dum^2
-  Xdiff[, i]=apply(dum,1,mean)
+  Xdiff[, i]=sqrt(apply(dum,1,mean))
 }
 ## Determination du regime le plus proche: classification
 class.Xdiff=apply(Xdiff,1,which.min)
-dist.reg=sqrt(apply(Xdiff,1,min)/nrow(dat.class$reg.var))
+dist.reg=sqrt(apply(Xdiff,1,min)/ncol(dat.class$reg.var))
 
 
-Xout = cbind(dat.IPSL.time[I.seas,], "class"  = class.Xdiff, "dist" = dist.reg)
+Xout = cbind(dat.IPSL.time[iseas,], "class"  = class.Xdiff, "dist" = dist.reg)
 write.table(file=fout,Xout,row.names=FALSE, quote=FALSE,col.names=TRUE)
 
 

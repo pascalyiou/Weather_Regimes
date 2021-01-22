@@ -50,7 +50,8 @@ pond.z500=1/sqrt(cos(dat.IPSL$lat*pi/180))
 scale.z500=rep(pond.z500, each=length(dat.IPSL$lon))
 
 ## Selection des jours correspondant a la saison seas
-ISEAS=which(dat.IPSL$time$month %in% l.seas[[seas]])
+iseas=which(dat.IPSL$time$month %in% l.seas[[seas]])
+if(length(ISEAS) == 0) stop("no data found for the selected season")
 dat.m=dat.IPSL$anom[ISEAS,]
 
 ## Calcul des PCs
@@ -61,7 +62,7 @@ pc.dat=prcomp(dat.m,scale.=scale.z500)
 dat.class=classnorm(pc.dat,nreg=nreg)
 
 ## Sauvegarde dans f.out au format Rdat
-save(file=fout,dat.class,pc.dat,nreg,fname,seas,dat.IPSL.time,ISEAS,
+save(file=fout,dat.class,pc.dat,nreg,fname,seas,dat.IPSL.time,iseas,
      l.seas,varname)
 
 
