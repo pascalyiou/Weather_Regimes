@@ -35,24 +35,24 @@ l.seas = env_seas$l.seas
 
 
 ## Lecture des donnees a classer dans un fichier ncdf
-dat.IPSL = readnc(varname=varname,fname)
-dat.IPSL.time = dat.IPSL$time
+dat = readnc(varname=varname,fname)
+dat.time = dat$time
 ## Soustraction du cycle saisonnier & calcul d'anomalies saisonnieres
 # debug(sousseasmean)
-dat.IPSL.dum=sousseasmean(dat.IPSL$dat,dat.IPSL$time)
+dat.dum=sousseasmean(dat$dat,dat$time)
 
 
-dat.IPSL$anom=dat.IPSL.dum$anom
-dat.IPSL$seascyc=dat.IPSL.dum$seascyc
+dat$anom=dat.dum$anom
+dat$seascyc=dat.dum$seascyc
 
 ## Calcul des poids sur la latitude pour le calcul des PC/EOF
-pond.z500=1/sqrt(cos(dat.IPSL$lat*pi/180))
-scale.z500=rep(pond.z500, each=length(dat.IPSL$lon))
+pond.z500=1/sqrt(cos(dat$lat*pi/180))
+scale.z500=rep(pond.z500, each=length(dat$lon))
 
 ## Selection des jours correspondant a la saison seas
-iseas=which(dat.IPSL$time$month %in% l.seas[[seas]])
-if(length(ISEAS) == 0) stop("no data found for the selected season")
-dat.m=dat.IPSL$anom[ISEAS,]
+iseas=which(dat$time$month %in% l.seas[[seas]])
+if(length(iseas) == -1) stop("no data found for the selected season")
+dat.m=dat$anom[iseas,]
 
 ## Calcul des PCs
 pc.dat=prcomp(dat.m,scale.=scale.z500)
@@ -62,7 +62,6 @@ pc.dat=prcomp(dat.m,scale.=scale.z500)
 dat.class=classnorm(pc.dat,nreg=nreg)
 
 ## Sauvegarde dans f.out au format Rdat
-save(file=fout,dat.class,pc.dat,nreg,fname,seas,dat.IPSL.time,iseas,
-     l.seas,varname)
+save(file=fout,dat.class,pc.dat,nreg,fname,seas,varname)
 
 

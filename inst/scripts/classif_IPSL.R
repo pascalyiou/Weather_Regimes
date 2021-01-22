@@ -35,25 +35,25 @@ seas = env_inputs$seas
 nreg = env_inputs$nreg
 
 ## Lecture des données de pression/Z500 sur les autres simulations
-dat.IPSL = readnc(fname=fname, varname=varname)
-if(ncol(dat.IPSL$dat) != ncol(dat.class$reg.var)) stop("lon/lat dimensions not matching between the input data and the weather regime medoids")
+dat = readnc(fname=fname, varname=varname)
+if(ncol(dat$dat) != ncol(dat.class$reg.var)) stop("lon/lat dimensions not matching between the input data and the weather regime medoids")
 ## "readipslnc" <- function(varname="t2m",fname,yr.range,ical=360)
 
 ## Soustraction du cycle saisonnier & calcul d'anomalies saisonnieres
-dat.IPSL.dum=sousseasmean(dat.IPSL$dat,dat.IPSL$time)
+dat.dum=sousseasmean(dat$dat,dat$time)
 
-dat.IPSL.time=dat.IPSL$time
+dat.time=dat$time
 
-dat.IPSL$anom=dat.IPSL.dum$anom
-dat.IPSL$seascyc=dat.IPSL.dum$seascyc
+dat$anom=dat.dum$anom
+dat$seascyc=dat.dum$seascyc
 
-iseas=which(dat.IPSL.time$month %in% l.seas[[seas]])
+iseas=which(dat.time$month %in% l.seas[[seas]])
 if(length(iseas) == 0) stop("no data found for the selected season")
 
 ## Calcul des distances a chaque WR identifie (nreg)
 Xdiff=matrix(NA, nrow=length(iseas), ncol=nreg)
 for(i in 1:nreg){
-  dum=t(t(dat.IPSL$anom[iseas,])-dat.class$reg.var[i,])
+  dum=t(t(dat$anom[iseas,])-dat.class$reg.var[i,])
   dum=dum^2
   Xdiff[, i]=sqrt(apply(dum,1,mean))
 }
@@ -62,7 +62,7 @@ class.Xdiff=apply(Xdiff,1,which.min)
 dist.reg=sqrt(apply(Xdiff,1,min)/ncol(dat.class$reg.var))
 
 
-Xout = cbind(dat.IPSL.time[iseas,], "class"  = class.Xdiff, "dist" = dist.reg)
+Xout = cbind(dat.time[iseas,], "class"  = class.Xdiff, "dist" = dist.reg)
 write.table(file=fout,Xout,row.names=FALSE, quote=FALSE,col.names=TRUE)
 
 
