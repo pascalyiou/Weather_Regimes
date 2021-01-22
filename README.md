@@ -12,7 +12,7 @@ This R package contains functions to compute weather regimes from netcdf file. T
 
 It can be installed with the package `remotes` by typing in an R console:
 
-`remotes::install_github("thaos/Weather_Regimes")`
+`remotes::install_github("thaos/WeatherRegimes", ref = "main")`
 
 The the package can then be loaded with:
 
@@ -68,14 +68,14 @@ The script returns a text file the following columns:
 ### compu_WR.sh
 
 A sample bash script to illustrate how to call the scripts `regimes_IPSL.R` 
-and `classif_IPSL.R` 
+and `classif_IPSL.R` .
 
-This script can be adapted to your need by changing the arguments of the scripts regimes_IPSL.R and classif_IPSL.R 
+This script can be adapted to your need by changing the arguments of the scripts `regimes_IPSL.R` and `classif_IPSL.R`.
 
 
-## Non-exported function
+## Non-exported functions
 
-Some functions are present in the R directory of the package but not exported (i.e. hidden from users")
+Some functions are present in the R directory of the package but not exported (i.e. hidden from users and undocumented).
 
 They are organized in the following way:
 
