@@ -3,8 +3,7 @@
 
 ## Soustraction de la moyenne saisonniere jour a jour pour une matrice
 ## Le cycle saisonnier peut etre estime sur un sous ensemble d'annees
-"sousseasmean"<-function(dat,conv.time,l.mon=1:12,
-                         l.year=unique(conv.time$year),rprint=FALSE)
+"sousseasmean"<-function(dat,conv.time, l.year=unique(conv.time$year),rprint=FALSE)
 {
     time.cyc = unique(conv.time[, c("month", "day")])
     seas.cyc = matrix(NA, nrow = nrow(time.cyc), ncol = ncol(dat))

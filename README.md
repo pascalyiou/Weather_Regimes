@@ -4,9 +4,9 @@ Computation of weather regimes and classification
 Pascal Yiou (LSCE), Jan. 2021
 
 This R package contains functions to compute weather regimes from netcdf file. The exported functions are:
-- readnc: reads data from a netcdf file
-- sousseasmean: computes the seasonal cycle and the anomalies from a dataset
-- classnorm: defines the weather regimes from a principal components analysis
+- `readnc`: reads data from a netcdf file
+- `sousseasmean`: computes the seasonal cycle and the anomalies from a dataset
+- `classnorm`: defines the weather regimes from a principal components analysis
 
 ## Installation
 
