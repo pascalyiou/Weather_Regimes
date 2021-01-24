@@ -49,6 +49,10 @@ dat$seascyc=dat.dum$seascyc
 pond.z500=1/sqrt(cos(dat$lat*pi/180))
 scale.z500=rep(pond.z500, each=length(dat$lon))
 
+## Pour faciliter la sauvegarde des longitudes et latitudes
+lon=dat$lon
+lat=dat$lat
+
 ## Selection des jours correspondant a la saison seas
 iseas=which(dat$time$month %in% l.seas[[seas]])
 if(length(iseas) == -1) stop("no data found for the selected season")
@@ -62,6 +66,6 @@ pc.dat=prcomp(dat.m,scale.=scale.z500)
 dat.class=classnorm(pc.dat,nreg=nreg)
 
 ## Sauvegarde dans f.out au format Rdat
-save(file=fout,dat.class,pc.dat,nreg,fname,seas,varname)
+save(file=fout,dat.class,pc.dat,nreg,fname,seas,varname,lon,lat,dat.time)
 
 
