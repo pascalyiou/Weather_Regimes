@@ -68,4 +68,4 @@ dat.class=classnorm(pc.dat,nreg=nreg)
 ## Sauvegarde dans f.out au format Rdat
 save(file=fout,dat.class,pc.dat,nreg,fname,seas,varname,lon,lat,dat.time)
 
-
+q("no")
